@@ -1,0 +1,139 @@
+# Helm values for development
+
+replicaCount: 1
+
+# Container image configuration for Apache2.
+image:
+  repository: httpd  # Apache2 Docker image
+  pullPolicy: IfNotPresent
+  tag: "2.4"
+
+# Optional imagePullSecrets for private image repositories.
+imagePullSecrets: []
+# Example:
+# imagePullSecrets:
+#   - name: myregistrykey
+
+# Override the chart or full name.
+nameOverride: ""
+fullnameOverride: ""
+
+# Service account configuration.
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account.
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+# Set Kubernetes annotations for the Pods.
+podAnnotations: {}
+# Set Kubernetes labels for the Pods.
+podLabels: {}
+
+# Pod security context.
+podSecurityContext: {}
+  # Example:
+  # fsGroup: 2000
+
+# Container security context.
+securityContext: {}
+  # Example:
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Configuration for the Apache2 service.
+service:
+  # This sets the service type (ClusterIP, NodePort, LoadBalancer).
+  type: ClusterIP
+  # This sets the port for the service.
+  port: 80
+
+# Ingress configuration for external access.
+ingress:
+  enabled: false  # Set to true if using an Ingress for public access.
+  className: ""
+  annotations: {}
+  hosts:
+    - host: apache-development.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  # Example:
+  # tls:
+  #   - secretName: chart-example-tls
+  #     hosts:
+  #       - chart-example.local
+
+# Resource requests and limits.
+env: development
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Liveness and readiness probes for Apache2.
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 30  # Give Apache2 time to start.
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 5
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Autoscaling configuration.
+autoscaling:
+  enabled: false  # Set to true for horizontal pod autoscaling.
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the Deployment definition.
+volumes: []
+# Example:
+# - name: config-volume
+#   configMap:
+#     name: apache-config
+#     items:
+#       - key: httpd.conf
+#         path: httpd.conf
+
+# Additional volumeMounts on the Deployment definition.
+volumeMounts: []
+# Example:
+# - name: config-volume
+#   mountPath: /usr/local/apache2/conf/httpd.conf
+#   subPath: httpd.conf
+#   readOnly: true
+
+# Node selector for scheduling pods on specific nodes.
+nodeSelector: {}
+
+# Tolerations for taints on nodes.
+tolerations: []
+
+# Affinity rules for pod scheduling.
+affinity: {}
